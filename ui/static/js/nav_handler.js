@@ -1,3 +1,43 @@
+const reader = document.getElementById("reader");
+const main = document.body.getElementsByTagName("main")[0]
+const entries = Array.from(document.querySelectorAll("a")).filter(a => a.href && a.href.includes("/entry/"))
+init()
+
+function init(current) {
+    entries.forEach(a => {
+        a.addEventListener("click", event => {
+            event.preventDefault()
+            softFetch(event.target.href)
+        })
+    })
+}
+
+function softPrevNext(a, current, mv) {
+    a.addEventListener("click", event => {
+        event.preventDefault()
+        const i = entries.findIndex(a => a.href === current)
+        softFetch(entries[i + mv].href)
+    })
+}
+
+function softFetch(href) {
+    fetch(href, { credentials: 'include' }).then(r => r.text().then(t => {
+        const parsed = new DOMParser().parseFromString(t, 'text/html')
+        reader.innerHTML = parsed.body.getElementsByTagName("main")[0].innerHTML
+        main.style.display = "none";
+        reader.style.display = "block";
+        reader.querySelectorAll("a[data-page=next]").forEach(a => softPrevNext(a, href, 1))
+        reader.querySelectorAll("a[data-page=previous]").forEach(a => softPrevNext(a, href, -1))
+    })).catch(() => console.log("noes !"))
+}
+
+const isReaderOn = () => reader.style.display === "block";
+
+function hideReader() {
+    reader.style.display = "none";
+    main.style.display = "block";
+}
+
 class NavHandler {
     setFocusToSearchInput(event) {
         event.preventDefault();
@@ -46,6 +86,17 @@ class NavHandler {
                 }
             });
         }
+    }
+
+    cacheOffline(showOnlyUnread, target) {
+        let items = DomHelper.getVisibleElements(".items .item");
+        let done = 0;
+        items.forEach(i => {
+            const url = location.origin + "/history/entry/" + i.querySelector('a').href.split("/entry/")[1]
+            fetch(url).then(_ => {
+                if (++done === items.length) target.innerText = target.dataset["done"]
+            })
+        })
     }
 
     saveEntry() {
@@ -155,26 +206,24 @@ class NavHandler {
         let element = document.querySelector("a[data-page=" + page + "]");
 
         if (element) {
-            document.location.href = element.href;
+            element.click();
         } else if (fallbackSelf) {
             window.location.reload();
         }
     }
 
     goToPrevious() {
-        if (this.isListView()) {
+        if (this.isListView())
             this.goToPreviousListItem();
-        } else {
+        if (isReaderOn())
             this.goToPage("previous");
-        }
     }
 
     goToNext() {
-        if (this.isListView()) {
+        if (this.isListView())
             this.goToNextListItem();
-        } else {
+        if (isReaderOn())
             this.goToPage("next");
-        }
     }
 
     goToFeedOrFeeds() {
@@ -189,7 +238,7 @@ class NavHandler {
     }
 
     goToPreviousListItem() {
-        let items = DomHelper.getVisibleElements(".items .item");
+        let items = main.querySelectorAll(".items .item");
         if (items.length === 0) {
             return;
         }
@@ -217,7 +266,7 @@ class NavHandler {
 
     goToNextListItem() {
         let currentItem = document.querySelector(".current-item");
-        let items = DomHelper.getVisibleElements(".items .item");
+        let items = main.querySelectorAll(".items .item");
         if (items.length === 0) {
             return;
         }

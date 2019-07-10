@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", function() {
         keyboardHandler.on("g s", () => navHandler.goToPage("settings"));
         keyboardHandler.on("ArrowLeft", () => navHandler.goToPrevious());
         keyboardHandler.on("ArrowRight", () => navHandler.goToNext());
-        keyboardHandler.on("k", () => navHandler.goToPrevious());        
+        keyboardHandler.on("k", () => navHandler.goToPrevious());
         keyboardHandler.on("p", () => navHandler.goToPrevious());
         keyboardHandler.on("j", () => navHandler.goToNext());
         keyboardHandler.on("n", () => navHandler.goToNext());
@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", function() {
         keyboardHandler.on("?", () => navHandler.showKeyboardShortcuts());
         keyboardHandler.on("#", () => navHandler.unsubscribeFromFeed());
         keyboardHandler.on("/", (e) => navHandler.setFocusToSearchInput(e));
-        keyboardHandler.on("Escape", () => ModalHandler.close());
+        keyboardHandler.on("Escape", () => hideReader() || ModalHandler.close());
         keyboardHandler.listen();
     }
 
@@ -65,6 +65,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
     mouseHandler.onClick("a[data-on-click=markPageAsRead]", (event) => {
         navHandler.markPageAsRead(event.target.dataset.showOnlyUnread || false);
+    });
+
+    mouseHandler.onClick("a[data-on-click=cacheOffline]", (event) => {
+        event.target.innerText = event.target.dataset["wip"]
+        navHandler.cacheOffline(event.target.dataset.showOnlyUnread || false, event.target);
     });
 
     mouseHandler.onClick("a[data-confirm]", (event) => {

@@ -10,9 +10,14 @@
         </li>
         <li>
             <a data-link-state="flip"
-               data-label-new-state="{{ t "menu.mark_all_as_read_wip" }}"
+               data-label-new-state="{{ t "menu.wip" }}"
                href="{{ route "markAllAsRead" }}">{{ t "menu.mark_all_as_read" }}</a>
         </li>
+        <li>
+            <a href="#" data-wip="{{ t "menu.wip" }}" data-done="{{ t "entry.done" }}"
+            data-on-click="cacheOffline">{{ t "menu.cache_offline" }}</a>
+        </li>
+
     </ul>
     {{ end }}
 </section>
